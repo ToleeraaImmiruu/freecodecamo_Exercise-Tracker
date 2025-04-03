@@ -115,14 +115,13 @@ app.get("/api/users/:_id/logs", async (req, res) => {
       if (req.query.to) query.date.$lte = new Date(req.query.to);
     }
 
-    let logs = await Exercise.find(query).select("description duration date");
-
-  logs = logs.map(log => ({
-  description: log.description,
-  duration: Number(log.duration), // Ensure duration is a number
-  date: log.date.toDateString(),
-}));
-
+ 
+     let logs = await Exercise.find(query).select('description duration date');
+   logs = logs.map(log => ({
+   description: log.description,
+   duration: Number(log.duration), // Ensure duration is a number
+   date: log.date.toDateString(),
+ }));
 
     if (req.query.limit) {
       logs = logs.slice(0, parseInt(req.query.limit));
