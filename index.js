@@ -52,16 +52,31 @@ app.post("/api/users", async (req, res) => {
   }
 });
 
-// ➤ Get all users
-app.get("/api/users", async (req, res) => {
+// ➤ Create a new user (Prevent duplicate usernames)
+app.post("/api/users", async (req, res) => {
   try {
-    const users = await User.find({}, "_id username");
-    res.json(users);
+    const { username } = req.body;
+    if (!username) {
+      return res.status(400).json({ error: "Username is required" });
+    }
+
+    // Check if user already exists
+    let existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.json({ username: existingUser.username, _id: existingUser._id });
+    }
+
+    // Create new user if it does not exist
+    const newUser = new User({ username });
+    await newUser.save();
+
+    res.json({ username: newUser.username, _id: newUser._id });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Error fetching users" });
+    res.status(500).json({ error: "Error creating user" });
   }
 });
+
 
 // ➤ Add an exercise for a user
 app.post("/api/users/:_id/exercises", async (req, res) => {
