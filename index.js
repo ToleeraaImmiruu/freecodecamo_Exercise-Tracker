@@ -15,13 +15,9 @@ app.use(express.urlencoded({ extended: true }));
 mongoose.connect(process.env.MONGO_URI, {});
 
 // Define Mongoose Schemas
-// const userSchema = new mongoose.Schema({
-//   username: { type: String, required: true },
-// });
 const userSchema = new mongoose.Schema({
-  username: { type: String, required: true, unique: true },  // Add `unique: true`
+  username: { type: String, required: true },
 });
-
 
 const exerciseSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -57,45 +53,15 @@ app.post("/api/users", async (req, res) => {
 });
 
 // ➤ Get all users
-// app.get("/api/users", async (req, res) => {
-//   try {
-//     const users = await User.find({}, "_id username");
-//     res.json(users);
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).json({ error: "Error fetching users" });
-//   }
-// });
-app.post("/api/users", async (req, res) => {
+app.get("/api/users", async (req, res) => {
   try {
-    if (!req.body.username) {
-      return res.status(400).json({ error: "Username is required" });
-    }
-
-    // Check if username already exists
-    let existingUser = await User.findOne({ username: req.body.username });
-    if (existingUser) {
-      return res.status(400).json({ error: "Username already taken" });
-    }
-
-    const newUser = new User({ username: req.body.username });
-    await newUser.save();
-
-    res.json({
-      username: newUser.username,
-      _id: newUser._id,
-    });
+    const users = await User.find({}, "_id username");
+    res.json(users);
   } catch (error) {
-    console.error("🔥 Error creating user:", error);
-    
-    if (error.code === 11000) {
-      return res.status(400).json({ error: "Username already exists" });
-    }
-
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error(error);
+    res.status(500).json({ error: "Error fetching users" });
   }
 });
-
 
 // ➤ Add an exercise for a user
 app.post("/api/users/:_id/exercises", async (req, res) => {
